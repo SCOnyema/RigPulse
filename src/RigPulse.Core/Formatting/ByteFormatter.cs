@@ -5,8 +5,9 @@ namespace RigPulse.Core.Formatting;
 /// </summary>
 /// <remarks>
 /// Uses binary multiples (1 KB = 1024 bytes) with the familiar KB/MB/GB labels, matching Windows
-/// Explorer and Task Manager. Values under 1 KB are shown as whole bytes; larger values use one
-/// decimal place. Negative, NaN and infinite inputs are treated as invalid and render as
+/// Explorer and Task Manager. Bytes and kilobytes are shown as whole numbers (e.g. "512 B/s",
+/// "340 KB/s"); megabytes and above use one decimal place (e.g. "3.4 MB/s"). Negative, NaN and
+/// infinite inputs are treated as invalid and render as
 /// <see cref="Unavailable"/>.
 /// </remarks>
 public static class ByteFormatter
@@ -17,6 +18,7 @@ public static class ByteFormatter
     public const string Unavailable = "–";
 
     private const double Step = 1024d;
+    private const int KilobyteUnit = 1; // index of "KB" in Units
 
     private static readonly string[] Units = ["B", "KB", "MB", "GB", "TB", "PB"];
 
@@ -50,7 +52,7 @@ public static class ByteFormatter
             unit++;
         }
 
-        // Rounding can turn e.g. 1023.96 KB into "1024.0 KB"; promote it to the next unit instead.
+        // Rounding can turn e.g. 1023.6 KB into "1024 KB"; promote it to the next unit instead.
         if (Math.Round(value, DecimalsFor(unit), MidpointRounding.AwayFromZero) >= Step && unit < Units.Length - 1)
         {
             value /= Step;
@@ -62,5 +64,6 @@ public static class ByteFormatter
         return string.Create(provider, $"{number} {Units[unit]}{suffix}");
     }
 
-    private static int DecimalsFor(int unit) => unit == 0 ? 0 : 1;
+    /// <summary>B and KB are whole numbers; MB and above get one decimal.</summary>
+    private static int DecimalsFor(int unit) => unit <= KilobyteUnit ? 0 : 1;
 }

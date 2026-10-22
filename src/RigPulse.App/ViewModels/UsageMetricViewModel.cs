@@ -1,6 +1,7 @@
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using RigPulse.Core.Formatting;
+using RigPulse.Core.Models;
 
 namespace RigPulse.App.ViewModels;
 
@@ -23,12 +24,17 @@ public sealed partial class UsageMetricViewModel(string label) : ObservableObjec
     [ObservableProperty]
     public partial double Percent { get; private set; }
 
+    /// <summary>Load band of <see cref="Percent"/>, used to colour the bar.</summary>
+    [ObservableProperty]
+    public partial LoadLevel Level { get; private set; }
+
     /// <summary>
     /// Updates the row. Pass <see langword="null"/> when the metric is unavailable.
     /// </summary>
     public void Update(double? percent, string? detail = null)
     {
         Percent = percent ?? 0;
+        Level = LoadLevels.FromPercent(Percent);
         Value = percent is { } p ? string.Create(CultureInfo.CurrentCulture, $"{p:0}%") : ByteFormatter.Unavailable;
         Detail = detail ?? string.Empty;
     }

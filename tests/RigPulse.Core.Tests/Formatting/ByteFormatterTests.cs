@@ -12,8 +12,9 @@ public sealed class ByteFormatterTests
     [InlineData(1, "1 B")]
     [InlineData(512, "512 B")]
     [InlineData(1023, "1023 B")]
-    [InlineData(1024, "1.0 KB")]
-    [InlineData(1536, "1.5 KB")]
+    [InlineData(1024, "1 KB")]
+    [InlineData(1_400, "1 KB")]
+    [InlineData(10_240, "10 KB")]
     [InlineData(1_048_576, "1.0 MB")]
     [InlineData(1_288_490_189, "1.2 GB")]
     [InlineData(17_179_869_184, "16.0 GB")]
@@ -26,16 +27,19 @@ public sealed class ByteFormatterTests
     [Theory]
     [InlineData(0, "0 B/s")]
     [InlineData(900, "900 B/s")]
+    [InlineData(51_200, "50 KB/s")]
+    [InlineData(348_160, "340 KB/s")]
     [InlineData(3_565_158, "3.4 MB/s")]
     [InlineData(125_829_120, "120.0 MB/s")]
-    public void FormatRate_AppendsPerSecond(double bytesPerSecond, string expected)
+    public void FormatRate_WholeNumbersBelowMegabytes_OneDecimalFromMegabytes(double bytesPerSecond, string expected)
     {
         ByteFormatter.FormatRate(bytesPerSecond, Invariant).ShouldBe(expected);
     }
 
     [Theory]
-    [InlineData(1023.6, "1.0 KB")]    // would otherwise print "1024 B"
-    [InlineData(1_048_525, "1.0 MB")] // 1023.95 KB would otherwise print "1024.0 KB"
+    [InlineData(1023.6, "1 KB")]      // would otherwise print "1024 B"
+    [InlineData(1_048_064, "1.0 MB")] // 1023.5 KB would otherwise print "1024 KB"
+    [InlineData(1_048_575, "1.0 MB")] // just under 1 MB
     public void Format_PromotesUnit_WhenRoundingReachesNextUnit(double bytes, string expected)
     {
         ByteFormatter.FormatBytes(bytes, Invariant).ShouldBe(expected);
@@ -62,6 +66,6 @@ public sealed class ByteFormatterTests
     [Fact]
     public void Format_RespectsCultureDecimalSeparator()
     {
-        ByteFormatter.FormatBytes(1536, CultureInfo.GetCultureInfo("de-DE")).ShouldBe("1,5 KB");
+        ByteFormatter.FormatRate(1_572_864, CultureInfo.GetCultureInfo("de-DE")).ShouldBe("1,5 MB/s");
     }
 }
