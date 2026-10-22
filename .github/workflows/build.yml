@@ -1,0 +1,34 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore RigPulse.sln
+
+      - name: Build
+        run: dotnet build RigPulse.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --solution RigPulse.sln --configuration Release --no-build

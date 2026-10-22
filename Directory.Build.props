@@ -1,0 +1,28 @@
+<Project>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <Deterministic>true</Deterministic>
+    <!-- Needed for IDE0005 (unused usings) at build time. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Authors>RigPulse contributors</Authors>
+    <Product>RigPulse</Product>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <!-- XML docs are required on public Core types only (CS1591 = missing XML comment). -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' != 'RigPulse.Core'">
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+</Project>
