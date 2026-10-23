@@ -58,7 +58,7 @@ public partial class App : Application
         {
             // The monitor loop never touches the UI thread synchronously, so blocking here is safe.
             _host.StopAsync(ShutdownTimeout).GetAwaiter().GetResult();
-            _host.Dispose(); // disposes singletons, including providers and their performance counters
+            _host.Dispose(); // disposes singletons: providers, performance counters and the hardware-monitoring library
         }
 
         base.OnExit(e);
@@ -90,6 +90,7 @@ public partial class App : Application
             .AddOptions<MonitorOptions>()
             .BindConfiguration(MonitorOptions.SectionName)
             .Validate(o => o.PollInterval >= TimeSpan.FromMilliseconds(250), "Monitor:PollInterval must be at least 250 ms.")
+            .Validate(o => o.SensorPollInterval >= TimeSpan.FromMilliseconds(500), "Monitor:SensorPollInterval must be at least 500 ms.")
             .Validate(o => o.HistoryCapacity > 0, "Monitor:HistoryCapacity must be positive.")
             .ValidateOnStart();
 
@@ -98,9 +99,12 @@ public partial class App : Application
         services.AddSingleton(sp => new RingBuffer<SystemSnapshot>(sp.GetRequiredService<IOptions<MonitorOptions>>().Value.HistoryCapacity));
         services.AddSingleton<ISnapshotPublisher>(new DispatcherSnapshotPublisher(Dispatcher));
         services.AddHostedService<MonitorService>();
+        services.AddSingleton<HardwareSensorFeed>();
+        services.AddHostedService<HardwareSensorService>();
 
         // UI
         services.AddSingleton<IWidgetSettingsStore, JsonWidgetSettingsStore>();
+        services.AddSingleton<IAdminRelauncher, AdminRelauncher>();
         services.AddSingleton<WidgetViewModel>();
         services.AddSingleton<WidgetWindow>();
     }

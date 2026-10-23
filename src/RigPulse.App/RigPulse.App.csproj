@@ -10,6 +10,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Source-generated (reflection-free) binding for IOptions<T>. -->
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <!-- asInvoker: never demands admin. Admin-only sensors show "–" until the user picks
+         "Restart as administrator". -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

@@ -16,4 +16,7 @@ internal static partial class Log
 
     [LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "{Metric} is available again.")]
     public static partial void MetricRecovered(this ILogger logger, string metric);
+
+    [LoggerMessage(EventId = 1003, Level = LogLevel.Debug, Message = "Closing the hardware-monitoring library failed.")]
+    public static partial void SensorLibraryCloseFailed(this ILogger logger, Exception exception);
 }

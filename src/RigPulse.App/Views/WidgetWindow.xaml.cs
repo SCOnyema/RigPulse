@@ -49,6 +49,7 @@ public partial class WidgetWindow : Window
         // Re-clamp with the real measured size, then start tracking moves.
         MoveTo(WindowPlacement.Resolve(this, new Point(Left, Top), new Size(ActualWidth, ActualHeight)));
         LocationChanged += OnLocationChanged;
+        SizeChanged += OnSizeChanged;
     }
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -74,6 +75,7 @@ public partial class WidgetWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         LocationChanged -= OnLocationChanged;
+        SizeChanged -= OnSizeChanged;
         base.OnClosed(e);
     }
 
@@ -82,6 +84,12 @@ public partial class WidgetWindow : Window
         _savePositionTimer.Stop();
         _savePositionTimer.Start();
     }
+
+    /// <summary>
+    /// Opening the details makes the window taller; nudge it up if it would run off the screen.
+    /// </summary>
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e) =>
+        MoveTo(WindowPlacement.Resolve(this, new Point(Left, Top), e.NewSize));
 
     private void SavePosition()
     {

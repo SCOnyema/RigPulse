@@ -14,7 +14,10 @@
 
   <Window.ContextMenu>
     <ContextMenu>
+      <MenuItem Header="Show details" IsCheckable="True" IsChecked="{Binding IsExpanded}" />
       <MenuItem Header="Always on top" IsCheckable="True" IsChecked="{Binding IsTopmost}" />
+      <MenuItem Header="Restart as administrator" Command="{Binding RestartAsAdminCommand}"
+                Visibility="{Binding CanRestartAsAdmin, Converter={StaticResource BooleanToVisibility}}" />
       <Separator />
       <MenuItem Header="Exit" Command="{Binding ExitCommand}" />
     </ContextMenu>
@@ -27,6 +30,21 @@
       <ContentControl Content="{Binding Gpu}" Focusable="False" />
       <ContentControl Content="{Binding Disk}" Focusable="False" />
       <ContentControl Content="{Binding Network}" Focusable="False" />
+
+      <!-- Details: hardware sensors, read only while this section is open. -->
+      <StackPanel Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibility}}">
+        <Border Style="{StaticResource DetailsDividerStyle}" />
+        <ContentControl Content="{Binding CpuSensors}" Focusable="False" />
+        <ContentControl Content="{Binding GpuSensors}" Focusable="False" />
+        <ContentControl Content="{Binding Vram}" Focusable="False" />
+        <ItemsControl ItemsSource="{Binding Fans}" Focusable="False" />
+        <ContentControl Content="{Binding Battery}" Focusable="False"
+                        Visibility="{Binding HasBattery, Converter={StaticResource BooleanToVisibility}}" />
+        <TextBlock Text="{Binding AccessHint}" Style="{StaticResource AccessHintStyle}"
+                   Visibility="{Binding HasAccessHint, Converter={StaticResource BooleanToVisibility}}" />
+      </StackPanel>
+
+      <ToggleButton IsChecked="{Binding IsExpanded}" Style="{StaticResource ChevronToggleStyle}" />
     </StackPanel>
   </Border>
 </Window>

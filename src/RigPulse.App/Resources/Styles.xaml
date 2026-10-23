@@ -23,6 +23,10 @@
   <SolidColorBrush x:Key="TrackBrush" Color="{StaticResource TrackColor}" />
 
   <FontFamily x:Key="WidgetFont">Segoe UI Variable Text, Segoe UI</FontFamily>
+  <!-- Windows 11 ships Segoe Fluent Icons; Windows 10 has the same glyphs in Segoe MDL2 Assets. -->
+  <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+  <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
 
   <!-- Fixed column widths shared by all rows. Card content width is 230 = 260 - 2 border - 28 padding.
        Throughput rows: label 44 + (symbol 16 + rate 72) + gap 10 + (symbol 16 + rate 72) = 230. -->
@@ -107,6 +111,57 @@
     <Setter Property="Margin" Value="0,4" />
   </Style>
 
+  <!-- Details section -->
+  <Style x:Key="DetailsDividerStyle" TargetType="Border">
+    <Setter Property="Height" Value="1" />
+    <Setter Property="Margin" Value="0,6,0,3" />
+    <Setter Property="Background" Value="{StaticResource CardBorderBrush}" />
+  </Style>
+
+  <Style x:Key="AccessHintStyle" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="FontStyle" Value="Italic" />
+    <Setter Property="TextAlignment" Value="Right" />
+    <Setter Property="Margin" Value="0,3,0,0" />
+  </Style>
+
+  <!-- Small chevron that opens and closes the details section. It sits in the card's bottom
+       padding (negative bottom margin), so the compact widget barely grows. -->
+  <Style x:Key="ChevronToggleStyle" TargetType="ToggleButton">
+    <Setter Property="Height" Value="12" />
+    <Setter Property="Margin" Value="0,0,0,-10" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="ToolTip" Value="Show details" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <!-- Transparent (not null) background so the whole strip is clickable. -->
+          <Border Background="Transparent">
+            <TextBlock x:Name="Glyph" Text="&#xE70D;" FontFamily="{StaticResource IconFont}" FontSize="8"
+                       Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.6"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Glyph" Property="Text" Value="&#xE70E;" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Glyph" Property="Opacity" Value="1" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="IsChecked" Value="True">
+        <Setter Property="ToolTip" Value="Hide details" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
   <!-- Row templates, picked automatically by view-model type -->
   <DataTemplate DataType="{x:Type vm:UsageMetricViewModel}">
     <StackPanel Style="{StaticResource MetricRowStyle}">
@@ -149,6 +204,28 @@
       <TextBlock Grid.Column="4" Text="{Binding SecondSymbol}" Style="{StaticResource MetricSymbolStyle}" />
       <TextBlock Grid.Column="5" Text="{Binding SecondRate}" Style="{StaticResource MetricValueStyle}" />
     </Grid>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type vm:SensorRowViewModel}">
+    <Grid Margin="0,3" ToolTip="{Binding ToolTip}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="{StaticResource LabelColumnWidth}" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" MinWidth="36" />
+      </Grid.ColumnDefinitions>
+      <TextBlock Text="{Binding Label}" Style="{StaticResource MetricLabelStyle}" />
+      <TextBlock Grid.Column="1" Text="{Binding Detail}" Style="{StaticResource MetricDetailStyle}" TextTrimming="CharacterEllipsis" />
+      <TextBlock x:Name="Value" Grid.Column="2" Text="{Binding Value}" Style="{StaticResource MetricValueStyle}" />
+    </Grid>
+    <!-- Temperature colour; thresholds live in RigPulse.Core.Models.TemperatureLevels. -->
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding Level}" Value="{x:Static models:LoadLevel.Elevated}">
+        <Setter TargetName="Value" Property="Foreground" Value="{StaticResource ElevatedBrush}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Level}" Value="{x:Static models:LoadLevel.Critical}">
+        <Setter TargetName="Value" Property="Foreground" Value="{StaticResource CriticalBrush}" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
   </DataTemplate>
 
 </ResourceDictionary>

@@ -18,6 +18,7 @@ internal sealed partial class MonitorService(
     IGpuProvider gpuProvider,
     IDiskProvider diskProvider,
     INetworkProvider networkProvider,
+    HardwareSensorFeed hardwareSensorFeed,
     ISnapshotPublisher publisher,
     RingBuffer<SystemSnapshot> history,
     IOptions<MonitorOptions> options,
@@ -51,13 +52,21 @@ internal sealed partial class MonitorService(
         LogStopped();
     }
 
-    private SystemSnapshot CollectSnapshot() => new(
-        timeProvider.GetUtcNow(),
-        Read(cpuProvider),
-        Read(memoryProvider),
-        Read(gpuProvider),
-        Read(diskProvider),
-        Read(networkProvider));
+    private SystemSnapshot CollectSnapshot()
+    {
+        // Hardware sensors are read by HardwareSensorService on a slower interval; take its latest.
+        var hardware = hardwareSensorFeed.Latest;
+
+        return new(
+            timeProvider.GetUtcNow(),
+            Read(cpuProvider),
+            Read(memoryProvider),
+            Read(gpuProvider),
+            Read(diskProvider),
+            Read(networkProvider),
+            hardware?.Sensors,
+            hardware?.Battery);
+    }
 
     /// <summary>
     /// Providers are designed not to throw, but one faulty provider must never stop the loop.

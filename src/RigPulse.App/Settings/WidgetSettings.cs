@@ -19,4 +19,7 @@ public sealed record WidgetSettings
 
     /// <summary>Whether the widget stays above other windows.</summary>
     public bool IsTopmost { get; init; } = true;
+
+    /// <summary>Whether the details section (temperatures, clocks, fans, battery) is open.</summary>
+    public bool IsExpanded { get; init; }
 }
